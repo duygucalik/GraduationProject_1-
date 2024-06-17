@@ -1,0 +1,242 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+import sklearn
+
+import warnings
+warnings.filterwarnings("ignore")
+from google.colab import drive
+%matplotlib inline
+import warnings
+from sklearn import datasets
+from sklearn.datasets import make_classification
+from sklearn.svm import SVC
+from google.colab import drive
+from sklearn.decomposition import PCA
+from sklearn.svm import LinearSVC
+from mlxtend.plotting import plot_decision_regions
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay,accuracy_score
+from sklearn import metrics
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import cross_val_score, KFold
+from sklearn.linear_model import LinearRegression, LogisticRegression
+
+# drive bağlantısı
+drive.mount('/content/drive')
+
+from google.colab import drive
+drive.mount('/content/drive')
+
+#Making the dataset read by the machine
+dataset = pd.read_csv("/content/sample_data/02-14-2018.csv")
+X=dataset.iloc[:,0:78].values   # selected attributes
+y=dataset.iloc[:,79].values  # label
+
+# It converts string expressions into float type variables.
+def Multilabelencoder(X,k):
+    from sklearn.preprocessing import LabelEncoder
+    X[:,k]= LabelEncoder().fit_transform(X[:,k])
+    return X
+
+# Converts string label values ​​to int values
+for i in range(1,4):
+    X=Multilabelencoder(X,i)
+from sklearn.preprocessing import LabelEncoder
+y= LabelEncoder().fit_transform(y)
+
+#We divide our dataset for the training phase. We reserved 20% for the testing phase.
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test =train_test_split(X,y,test_size=0.2,random_state=0)
+
+#We scale our test data by applying a standard scaler.
+from sklearn.preprocessing import StandardScaler
+sc_X= StandardScaler()
+X_train=sc_X.fit_transform(X_train)
+X_test=sc_X.transform(X_test)
+
+SVM CLASSIFICATION (LINEAR)
+#We compress our dataset with PCA.
+classifier = SVC(kernel ='linear', random_state=0)
+pca = PCA(n_components=2)
+
+X_train2D = pca.fit_transform(X_train)
+X_test2D = pca.fit_transform(X_test)
+
+classifier.fit(X_train2D, y_train) 
+test_predictions = classifier.predict(X_test2D)
+precision = metrics.accuracy_score(test_predictions, y_test) * 100
+print("Accuracy with SVM considering only first 2PC: {0:.2f}%".format(precision))
+
+linear_model = SVC(gamma='auto', kernel='linear')
+print(linear_model)
+linear_model.fit(X_train, y_train) 
+y_pred = linear_model.predict(X_test)
+
+#Using plotting, we indicate the border line of the linear model in the graphic.
+plot_decision_regions(X_train2D, y_train, clf=classifier, legend=1)
+plt.xlabel('PC1')
+plt.ylabel('PC2')
+plt.title('Linear SVM Decision Boundaries')
+plt.show()
+
+conf_matrix=confusion_matrix(y_test, y_pred)
+SVC(random_state=0)
+predictionsLinear = linear_model.predict(X_test)
+cm_linear = confusion_matrix(y_test, predictionsLinear, labels=linear_model.classes_)
+disp_linear= ConfusionMatrixDisplay(confusion_matrix=cm_linear, display_labels=linear_model.classes_)
+disp_linear.plot()
+plt.show()
+
+#We calculate the accuracy recall, precision and f1 score of the linear model.
+print("Linear accuary:", metrics.accuracy_score(y_test,y_pred))
+print("Linear Precision:",metrics.precision_score(y_test, y_pred))
+print("Linear Recall:",metrics.recall_score(y_test, y_pred))
+print("Linear F1 Score:",metrics.f1_score(y_test, y_pred,average='binary'))
+
+SVM CLASSIFICATION (POLINOMİAL)
+#We are training for Polynomial.
+poly_model = SVC(gamma='auto',kernel='poly')
+print(poly_model)
+poly_model.fit(X_train, y_train) 
+y_pred = poly_model.predict(X_test)
+
+#We train for POLY on the data we compress with PCA.
+poly_classifier = SVC(kernel ='poly', random_state=0)
+pca = PCA(n_components=2)
+X_train2D = pca.fit_transform(X_train)
+X_test2D = pca.fit_transform(X_test)
+
+poly_classifier.fit(X_train2D, y_train) 
+test_predictions = poly_classifier.predict(X_test2D)
+precision = metrics.accuracy_score(test_predictions, y_test) * 100
+print("Accuracy with SVM considering only first 2PC: {0:.2f}%".format(precision))
+
+#Using plotting, we indicate the border line of the linear model in the graphic.
+plot_decision_regions(X_train2D, y_train, clf=poly_classifier, legend=1)
+plt.xlabel('PC1')
+plt.ylabel('PC2')
+plt.title('Poliynomial SVM Decision Boundaries')
+plt.show()
+
+##It draws the matrix of polynomial classification with confusion matrix.
+conf_matrix=confusion_matrix(y_test, y_pred)
+SVC(random_state=0)
+predictionsLinear = poly_model.predict(X_test)
+cm_linear = confusion_matrix(y_test, predictionsLinear, labels=poly_model.classes_)
+disp_linear= ConfusionMatrixDisplay(confusion_matrix=cm_linear, display_labels=poly_model.classes_)
+disp_linear.plot()
+plt.show()
+
+#We calculate the accuracy, recall, precision and f1 score of the poly model.
+print("Poly accuary:", metrics.accuracy_score(y_test,y_pred))
+print("poly Precision:",metrics.precision_score(y_test, y_pred))
+print("poly Recall:",metrics.recall_score(y_test, y_pred))
+print("poly F1 Score:",metrics.f1_score(y_test, y_pred,average='binary'))
+
+SVM CLASSIFICATION (RBF)
+
+rbf_model = SVC(gamma='auto',kernel='rbf')
+print(rbf_model)
+rbf_model.fit(X_train, y_train) 
+y_pred = rbf_model.predict(X_test)
+
+rbf_classifier = SVC(kernel ='rbf', random_state=0)
+
+rbf_classifier.fit(X_train2D, y_train) 
+test_predictions = rbf_classifier.predict(X_test2D)
+precision = metrics.accuracy_score(test_predictions, y_test) * 100
+print("Accuracy with SVM considering only first 2PC: {0:.2f}%".format(precision))
+
+#Plotting decision boundaries
+plot_decision_regions(X_train2D, y_train, clf=rbf_classifier, legend=1)
+plt.xlabel('PC1')
+plt.ylabel('PC2')
+plt.title('RBF Decision Boundaries')
+plt.show()
+ 
+conf_matrix=confusion_matrix(y_test, y_pred)
+SVC(random_state=0)
+predictionsLinear = rbf_model.predict(X_test)
+cm_linear = confusion_matrix(y_test, predictionsLinear, labels=rbf_model.classes_)
+disp_linear= ConfusionMatrixDisplay(confusion_matrix=cm_linear, display_labels=rbf_model.classes_)
+disp_linear.plot()
+plt.show()
+
+print("accuary:", metrics.accuracy_score(y_test,y_pred))
+print("Precision:",metrics.precision_score(y_test, y_pred))
+print("Recall:",metrics.recall_score(y_test, y_pred))
+print("F1 Score:",metrics.f1_score(y_test, y_pred,average='binary'))
+
+K-FOLD CLASSIFICATION 
+# It runs the regression model on the train data set and performs machine learning.
+lr = LinearRegression()
+lr.fit(X_train,y_train)
+
+def scoreResults(model, X_train, X_test, y_train, y_test):
+
+    y_train_predict = model.predict(X_train)   #We assign the training data of the model to a variable.
+    y_test_predict = model.predict(X_test)     #We assign the test data of the model to a variable.
+
+    r2_train = metrics.r2_score(y_train, y_train_predict)
+    r2_test = metrics.r2_score(y_test, y_test_predict)
+
+    mse_train = metrics.mean_squared_error(y_train, y_train_predict)  #It looks for error frames in both test and train.
+    mse_test = metrics.mean_squared_error(y_test, y_test_predict)
+
+    return [r2_train, r2_test, mse_train, mse_test]
+
+#We calculated the k fold value for linear regression.
+result_lr = scoreResults(model = lr, X_train = X_train, X_test = X_test, y_train = y_train, y_test = y_test)
+
+print(f"Train R2 Score: {result_lr[0]:.4f} MSE: {result_lr[2]:.4f}")
+print(f"Test R2 Score: {result_lr[1]:9.4f} MSE: {result_lr[3]:.4f}")
+
+scores = []                        #It will include the model scores determined as a result of each iteration in the list.
+lr_cv = LinearRegression()         # variable to which the regression model is assigned
+k = 10                             # It is the variable that tells how many iterations will be provided.
+sayac = 1                          #the value that counts each cycle and will increase
+cv = KFold(n_splits=k, random_state = 0, shuffle=True)
+for train_index, test_index in cv.split(X):
+    X_train, X_test, y_train, y_test = X[train_index], X[test_index], y[train_index], y[test_index]
+    lr_cv.fit(X_train, y_train)
+
+    result = scoreResults(model = lr_cv
+                          ,X_train = X_train
+                          ,X_test = X_test
+                          ,y_train = y_train
+                          ,y_test = y_test)
+
+    print(f"{sayac}. veri kesiti")
+    print(f"Train R2 Score: {result[0]:.4f} MSE(düşük hata değeri): {result[2]:.4f}")
+    print(f"Test R2 Score: {result[1]:9.4f} MSE(düşük hata değeri): {result[3]:.4f}\n")
+    sayac += 1
+    scores.append(lr_cv.score(X_test, y_test))
+
+ENSEMBLE CLASSIFICATION 
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import VotingClassifier
+log_clf = LogisticRegression()        #3 different methods are chosen. logistic regresyon - random forest- svm
+rnd_clf = RandomForestClassifier()
+svm_clf = SVC()
+
+#We train a voting classifier consisting of 3 different classifiers of our choice.
+voting_clf = VotingClassifier(estimators=[('lr',log_clf),('rf',rnd_clf),('svc',svm_clf)],voting='hard')
+voting_clf.fit(X_train,y_train) 
+
+#It checks the accuracy of each classifier in the test set.
+for clf in (log_clf,rnd_clf,svm_clf,voting_clf):
+  clf.fit(X_train,y_train)
+  y_pred = clf.predict(X_test)
+  print(clf.__class__.__name__,accuracy_score(y_test,y_pred))
+
+conf_matrix=confusion_matrix(y_test, y_pred)
+SVC(random_state=0)
+predictionsLogistic = clf.predict(X_test)
+cm_logistic = confusion_matrix(y_test, predictionsLogistic, labels=clf.classes_)
+disp_voiting= ConfusionMatrixDisplay(confusion_matrix=cm_logistic, display_labels=linear_model.classes_)
+disp_voiting.plot()
+plt.show()
+
+print("accuary:", metrics.accuracy_score(y_test,y_pred))
+# accuary: 0.945216355696705
