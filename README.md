@@ -1,6 +1,6 @@
 # GraduationProject_1
 Ddos attack detection with machine learning algorithms
-### Kullanılan Makine Öğrenmesi Algoritmaları
+### Machine Learning Algorithms Used
 * SVM Linear Regression
 * SVM Polinomial Regression
 * K-Fold
